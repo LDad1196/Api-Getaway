@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: corsi-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/corsi/**
+        - id: Discenti
+          uri: http://localhost:8080
+          predicates:
+            - Path=/discenti/**
+        - id: Docenti
+          uri: http://localhost:8080
+          predicates:
+            - Path=/docenti/**
+
+server:
+  port: 9090
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web.reactive: DEBUG
+    root: INFO
