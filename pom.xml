@@ -27,12 +27,6 @@
 			<artifactId>spring-cloud-starter-gateway</artifactId>
 		</dependency>
 
-		<!-- Eureka Client per service discovery -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-		</dependency>
-
 		<!-- Circuit Breaker -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
