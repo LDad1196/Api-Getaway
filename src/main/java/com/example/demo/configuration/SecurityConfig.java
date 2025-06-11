@@ -9,12 +9,14 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
+
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(authorize -> authorize
-                        .anyExchange().permitAll())
+                        .pathMatchers("/auth/login").permitAll()
+                        .anyExchange().permitAll()) // Lascia che il Gateway Filter gestisca l'auth
                 .build();
     }
 }

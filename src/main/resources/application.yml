@@ -3,3 +3,7 @@ spring:
     active: dev
   application:
     name: api-gateway
+jwt:
+  secret: myVeryLongSecretKeyThatIsAtLeast256BitsLong1234567890
+  expiration: 86400
+

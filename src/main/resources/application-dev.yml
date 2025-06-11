@@ -4,18 +4,29 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: corsi-service
+        - id: Corsi
           uri: http://localhost:8081
           predicates:
-            - Path=/corsi/**
+            - Path=/api/corsi/**
+          filters:
+            - StripPrefix=1
+            - RewritePath=/api/corsi/(?<segment>.*), /corsi/${segment}
+
         - id: Discenti
           uri: http://localhost:8080
           predicates:
-            - Path=/discenti/**
+            - Path=/api/discenti/**
+          filters:
+            - StripPrefix=1
+            - RewritePath=/api/discenti/(?<segment>.*), /discenti/${segment}
+
         - id: Docenti
           uri: http://localhost:8080
           predicates:
-            - Path=/docenti/**
+            - Path=/api/docenti/**
+          features:
+            - StripPrefix=1
+            - RewritePath=/api/docenti/(?<segment>.*),/docenti/${segment}
 
 server:
   port: 9090
