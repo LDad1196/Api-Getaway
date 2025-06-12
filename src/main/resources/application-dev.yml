@@ -1,9 +1,20 @@
+
 spring:
   application:
     name: api-gateway
-  user:
-    name: user
-    password: password
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user_auth
+    username: postgres
+    password: 1234567890
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
   cloud:
     gateway:
       routes:
@@ -14,6 +25,7 @@ spring:
           filters:
             - StripPrefix=1
             - RewritePath=/api/corsi/(?<segment>.*), /corsi/${segment}
+
         - id: Discenti
           uri: http://localhost:8080
           predicates:
@@ -21,6 +33,7 @@ spring:
           filters:
             - StripPrefix=1
             - RewritePath=/api/discenti/(?<segment>.*), /discenti/${segment}
+
         - id: Docenti
           uri: http://localhost:8080
           predicates:
@@ -36,4 +49,6 @@ logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     org.springframework.web.reactive: DEBUG
+    org.springframework.security: DEBUG
+    com.example.demo: DEBUG
     root: INFO
