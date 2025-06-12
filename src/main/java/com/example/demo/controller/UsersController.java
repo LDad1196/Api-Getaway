@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.data.DTO.UsersDTO;
+import com.example.demo.data.entity.Users;
 import com.example.demo.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
