@@ -2,6 +2,7 @@ package com.example.demo.configuration;
 
 import com.example.demo.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.*;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.*;
 import org.springframework.security.crypto.bcrypt.*;
@@ -10,6 +11,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
 @EnableWebFluxSecurity
+@EnableReactiveMethodSecurity
 public class SecurityConfig {
 
     @Bean
