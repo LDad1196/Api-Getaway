@@ -1,17 +1,4 @@
 spring:
   profiles:
     active: dev
-  application:
-    name: api-gateway
-  r2dbc:
-    url: r2dbc:postgresql://localhost:5432/corso
-    username: postgres
-    password: 1234567890
-  datasource:
-    driver-class-name: org.postgresql.Driver
-  main:
-    web-application-type: reactive
-jwt:
-  secret: myVeryLongSecretKeyThatIsAtLeast256BitsLong1234567890
-  expiration: 86400
 

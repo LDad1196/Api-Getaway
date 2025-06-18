@@ -7,29 +7,31 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secretKey:myVeryLongAndSecureSecretKeyThatIsAtLeast32Characters!}")
+    @Value("${jwt.secretKey:myVeryLongSecretKeyThatIsAtLeast32Characters!}")
     private String secretKey;
 
     @Value("${jwt.expirationTime:3600000}")
     private Long expirationTime;
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
+        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
+
 
     public String generateToken(Users user) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .claim("role", user.getRole().name())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(getSigningKey())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // 👈 specifica algoritmo!
                 .compact();
     }
 
