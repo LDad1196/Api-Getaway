@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
+import com.example.demo.data.DTO.UsersDTO;
+import com.example.demo.data.entity.Users;
 import com.example.demo.security.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.service.UsersService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -12,29 +14,25 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final UsersService usersService;
+    private final JwtUtil jwtUtil;
 
-    @PostMapping("/login")
-    public Mono<ResponseEntity<Map<String, String>>> login(@RequestBody LoginRequest request) {
-        // Qui dovresti verificare username e password contro il tuo database
-        // Per semplicità, uso credenziali hardcoded
-        if ("admin".equals(request.getUsername()) && "password".equals(request.getPassword())) {
-            String token = jwtUtil.generateToken(request.getUsername());
-            return Mono.just(ResponseEntity.ok(Map.of("token", token)));
-        }
-
-        return Mono.just(ResponseEntity.status(401).body(Map.of("error", "Invalid credentials")));
+    public AuthController(UsersService usersService, JwtUtil jwtUtil) {
+        this.usersService = usersService;
+        this.jwtUtil = jwtUtil;
     }
 
-    public static class LoginRequest {
-        private String username;
-        private String password;
+    @PostMapping("/register")
+    public Mono<ResponseEntity<String>> register(@RequestBody UsersDTO dto) {
+        return usersService.register(dto)
+                .map(user -> ResponseEntity.ok("Utente registrato con successo"));
+    }
 
-        // Getters e setters
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
+    @PostMapping("/login")
+    public Mono<ResponseEntity<Map<String, String>>> login(@RequestBody UsersDTO dto) {
+        return usersService.authenticate(dto.getUsername(), dto.getPassword())
+                .map(user -> jwtUtil.generateToken(user))
+                .map(token -> ResponseEntity.ok(Map.of("token", token)))
+                .switchIfEmpty(Mono.just(ResponseEntity.status(401).build()));
     }
 }

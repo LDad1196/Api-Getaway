@@ -1,60 +1,47 @@
-
 package com.example.demo.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.repository.UsersRepository;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.*;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.web.server.context.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Component
-public class JwtAuthenticationFilter implements WebFilter {
+public class JwtAuthenticationFilter implements ServerSecurityContextRepository {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
+    private final UsersRepository usersRepository;
+
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UsersRepository usersRepository) {
+        this.jwtUtil = jwtUtil;
+        this.usersRepository = usersRepository;
+    }
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String path = exchange.getRequest().getPath().value();
+    public Mono<Void> save(ServerWebExchange exchange, SecurityContext context) {
+        return Mono.empty(); // stateless
+    }
 
-        // Salta l'autenticazione per il login
-        if (path.equals("/auth/login")) {
-            return chain.filter(exchange);
-        }
-
+    @Override
+    public Mono<SecurityContext> load(ServerWebExchange exchange) {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-
-            try {
-                String username = jwtUtil.extractUsername(token);
-
-                if (username != null && jwtUtil.validateToken(token, username)) {
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(username, null, new ArrayList<>());
-
-                    // Correggi qui: usa contextWrite prima di chiamare chain.filter
-                    return chain.filter(exchange)
-                            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
-                }
-            } catch (Exception e) {
-                // Log dell'errore per debug
-                System.err.println("Errore JWT: " + e.getMessage());
-                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-                return exchange.getResponse().setComplete();
-            }
+            String username = jwtUtil.extractUsername(token);
+            return usersRepository.findByUsername(username)
+                    .filter(user -> jwtUtil.validateToken(token, username))
+                    .map(user -> new UsernamePasswordAuthenticationToken(
+                            username, null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
+                    ))
+                    .map(SecurityContextImpl::new);
         }
-
-        // Nessun token valido
-        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-        return exchange.getResponse().setComplete();
+        return Mono.empty();
     }
 }
